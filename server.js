@@ -69,7 +69,9 @@ app.post("/cadastro", async (req, res) => {
 
     const usuarioExistente = await buscarUsuarioPorEmail(req.body.email);
     if (usuarioExistente) {
-      return res.status(400).json({ error: "E-mail já cadastrado" });
+      return res.status(400).json({
+        error: "E-mail já cadastrado",
+      });
     }
 
     const usuario = await criarUsuario(req.body);
@@ -116,6 +118,22 @@ app.get("/usuarios", async (req, res) => {
   } catch (error) {
     console.error("Erro ao listar usuários:", error);
     res.status(500).json({ error: "Erro ao carregar usuários" });
+  }
+});
+app.post("/deletarusuario", async (req, res) => {
+  try {
+    const email = req.body.email;
+    const usuario = await buscarUsuarioPorEmail(email);
+
+    if (!usuario) {
+      return res.status(404).json({ error: "Usuário não encontrado!" });
+    }
+
+    await usuario.destroy(); // Corrigido: remove o parâmetro desnecessário
+    res.json({ message: "Usuário deletado com sucesso!" });
+  } catch (error) {
+    console.error("Erro ao deletar usuário:", error);
+    res.status(500).json({ error: "Erro interno ao apagar usuário!" }); // Status 500, não 512
   }
 });
 
