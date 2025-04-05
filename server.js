@@ -2,6 +2,17 @@ const express = require("express");
 const app = express();
 const port = 3000;
 
+const cors = require("cors"); // Importe o pacote cors
+
+// Configuração do CORS (coloque ANTES das rotas)
+app.use(
+  cors({
+    origin: "http://localhost:5173", // Ou a porta onde seu Vue.js está rodando
+    methods: ["GET", "POST", "PUT", "DELETE"],
+    allowedHeaders: ["Content-Type"],
+  })
+);
+
 // Conectando com o banco de dados
 const Sequelize = require("sequelize");
 const sequelize = new Sequelize("dbprojeto", "root", "1234", {
@@ -109,16 +120,11 @@ app.post("/login", async (req, res) => {
 });
 
 app.get("/usuarios", async (req, res) => {
-  try {
-    const usuarios = await Usuario.findAll({
-      order: [["nome", "ASC"]],
-      attributes: { exclude: ["senha"] },
-    });
-    res.json(usuarios);
-  } catch (error) {
-    console.error("Erro ao listar usuários:", error);
-    res.status(500).json({ error: "Erro ao carregar usuários" });
-  }
+  const usuarios = await Usuario.findAll({
+    attributes: ["id", "nome", "email", "idade"], // Apenas estes campos
+    raw: true,
+  });
+  res.json(usuarios);
 });
 app.post("/deletarusuario", async (req, res) => {
   try {
