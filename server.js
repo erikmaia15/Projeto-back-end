@@ -126,20 +126,26 @@ app.get("/usuarios", async (req, res) => {
   });
   res.json(usuarios);
 });
+
 app.post("/deletarusuario", async (req, res) => {
   try {
-    const email = req.body.email;
+    const { email } = req.body; // Desestruturação mais limpa
+
+    if (!email) {
+      return res.status(400).json({ error: "E-mail é obrigatório!" });
+    }
+
     const usuario = await buscarUsuarioPorEmail(email);
 
     if (!usuario) {
       return res.status(404).json({ error: "Usuário não encontrado!" });
     }
 
-    await usuario.destroy(); // Corrigido: remove o parâmetro desnecessário
+    await usuario.destroy();
     res.json({ message: "Usuário deletado com sucesso!" });
   } catch (error) {
     console.error("Erro ao deletar usuário:", error);
-    res.status(500).json({ error: "Erro interno ao apagar usuário!" }); // Status 500, não 512
+    res.status(500).json({ error: "Erro interno ao apagar usuário!" });
   }
 });
 
